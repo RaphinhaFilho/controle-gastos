@@ -1,0 +1,5 @@
+### Teste 1 - API pública (deve funcionar)
+GET https://jsonplaceholder.typicode.com/posts/1
+
+### Teste 2 - Outra API pública
+GET https://viacep.com.br/ws/01001000/json/

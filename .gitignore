@@ -1,0 +1,21 @@
+# Dependências
+node_modules/
+
+# Segredos
+.env
+.env.local
+
+# Banco de dados local
+*.db
+banco.db
+
+# Build
+dist/
+build/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
