@@ -20,6 +20,9 @@ if (!estaLogado()) {
   const balanceValue = document.getElementById('balance-value');
   const incomeValue = document.getElementById('income-value');
   const expenseValue = document.getElementById('expense-value');
+  const summaryValues = [balanceValue, incomeValue, expenseValue];
+  const summarySkeletons = ['balance', 'income', 'expense']
+    .map((name) => document.getElementById(`${name}-skeleton`));
   const transactionCount = document.getElementById('transaction-count');
   const loadingState = document.getElementById('loading-state');
   const errorState = document.getElementById('error-state');
@@ -33,6 +36,15 @@ if (!estaLogado()) {
   const saveButton = transactionForm.querySelector('button[type="submit"]');
 
   let transactions = [];
+
+  function setSummaryLoading(isLoading) {
+    summaryValues.forEach((value) => {
+      value.hidden = isLoading;
+    });
+    summarySkeletons.forEach((skeleton) => {
+      skeleton.hidden = !isLoading;
+    });
+  }
 
   document.getElementById('logout-button').addEventListener('click', logout);
 
@@ -147,6 +159,7 @@ if (!estaLogado()) {
     errorState.hidden = true;
     emptyState.hidden = true;
     tableWrap.hidden = true;
+    setSummaryLoading(true);
 
     try {
       const dados = await listarTransacoes();
@@ -160,9 +173,11 @@ if (!estaLogado()) {
       transactions = normalizedTransactions;
       loadingState.hidden = true;
       renderTransactions();
+      setSummaryLoading(false);
     } catch (error) {
       transactions = [];
       updateSummary();
+      setSummaryLoading(false);
       showLoadError(error.message || 'Não foi possível carregar as transações. Tente novamente.');
     }
   }

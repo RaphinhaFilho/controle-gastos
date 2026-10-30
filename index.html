@@ -42,7 +42,8 @@
             <div class="flex items-start justify-between gap-4">
               <div>
                 <p class="summary-label text-xs font-medium uppercase tracking-wider text-white/65">Receitas</p>
-                <p class="summary-value mt-4 text-3xl font-semibold tracking-tight text-white" id="income-value">R$ 0,00</p>
+                <p class="summary-value mt-4 text-3xl font-semibold tracking-tight text-white" id="income-value" hidden>R$ 0,00</p>
+                <div class="summary-skeleton mt-4 h-9 w-36 animate-pulse rounded-md bg-white/15" id="income-skeleton" aria-hidden="true"></div>
                 <p class="summary-caption mt-2 text-xs text-white/55">Total recebido</p>
               </div>
               <span class="summary-icon text-emerald-200" aria-hidden="true">
@@ -54,7 +55,8 @@
             <div class="flex items-start justify-between gap-4">
               <div>
                 <p class="summary-label text-xs font-medium uppercase tracking-wider text-white/65">Despesas</p>
-                <p class="summary-value mt-4 text-3xl font-semibold tracking-tight text-white" id="expense-value">R$ 0,00</p>
+                <p class="summary-value mt-4 text-3xl font-semibold tracking-tight text-white" id="expense-value" hidden>R$ 0,00</p>
+                <div class="summary-skeleton mt-4 h-9 w-36 animate-pulse rounded-md bg-white/15" id="expense-skeleton" aria-hidden="true"></div>
                 <p class="summary-caption mt-2 text-xs text-white/55">Total gasto</p>
               </div>
               <span class="summary-icon text-rose-200" aria-hidden="true">
@@ -66,7 +68,8 @@
             <div class="flex items-start justify-between gap-4">
               <div>
                 <p class="summary-label text-xs font-medium uppercase tracking-wider text-white/65">Saldo</p>
-                <p class="summary-value mt-4 text-3xl font-semibold tracking-tight text-white" id="balance-value">R$ 0,00</p>
+                <p class="summary-value mt-4 text-3xl font-semibold tracking-tight text-white" id="balance-value" hidden>R$ 0,00</p>
+                <div class="summary-skeleton mt-4 h-9 w-36 animate-pulse rounded-md bg-white/15" id="balance-skeleton" aria-hidden="true"></div>
                 <p class="summary-caption mt-2 text-xs text-white/55">Receitas menos despesas</p>
               </div>
               <span class="summary-icon text-brand-lilac" aria-hidden="true">
@@ -89,8 +92,20 @@
             <div class="loading-state flex min-h-64 flex-col items-center justify-center gap-4 p-6 text-center text-sm text-white/70" id="loading-state" aria-live="polite">
               <span class="loading-spinner" aria-hidden="true"></span>
               <span>Carregando suas transações...</span>
-              <div class="skeleton-row shimmer w-full max-w-2xl" aria-hidden="true"></div>
-              <div class="skeleton-row shimmer w-2/3 max-w-lg" aria-hidden="true"></div>
+              <div class="transaction-skeleton w-full overflow-hidden" aria-hidden="true">
+                <div class="grid grid-cols-6 gap-3 border-b border-white/10 px-3 py-3">
+                  <span class="h-3 animate-pulse rounded-sm bg-white/15"></span><span class="h-3 animate-pulse rounded-sm bg-white/15"></span><span class="h-3 animate-pulse rounded-sm bg-white/15"></span><span class="h-3 animate-pulse rounded-sm bg-white/15"></span><span class="h-3 animate-pulse rounded-sm bg-white/15"></span><span class="h-3 animate-pulse rounded-sm bg-white/15"></span>
+                </div>
+                <div class="grid grid-cols-6 gap-3 border-b border-white/10 px-3 py-4">
+                  <span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="col-span-1 h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span>
+                </div>
+                <div class="grid grid-cols-6 gap-3 border-b border-white/10 px-3 py-4">
+                  <span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span>
+                </div>
+                <div class="grid grid-cols-6 gap-3 px-3 py-4">
+                  <span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span><span class="h-4 animate-pulse rounded-sm bg-white/10"></span>
+                </div>
+              </div>
             </div>
 
             <div class="error-state flex min-h-64 flex-col items-center justify-center gap-3 p-6 text-center" id="error-state" hidden>

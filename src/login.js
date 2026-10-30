@@ -37,7 +37,7 @@ async function handleLogin(event) {
 
   submitButton.disabled = true;
   submitButton.setAttribute('aria-busy', 'true');
-  buttonLabel.textContent = 'Entrando...';
+  buttonLabel.innerHTML = '<span class="login-spinner" aria-hidden="true"></span><span>Entrando...</span>';
 
   try {
     await login(emailInput.value.trim(), passwordInput.value);
