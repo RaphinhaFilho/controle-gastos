@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
-const db = require('../db');
+const pool = require('../db');
 const { gerarToken } = require('../auth');
 
 const router = express.Router();
@@ -28,11 +28,12 @@ router.post('/register', async (req, res) => {
       });
     }
 
-    const existente = db
-      .prepare('SELECT id FROM usuarios WHERE email = ?')
-      .get(email);
+    const existente = await pool.query(
+      'SELECT id FROM usuarios WHERE email = $1',
+      [email]
+    );
 
-    if (existente) {
+    if (existente.rowCount > 0) {
       return res.status(400).json({
         erro: 'Email já cadastrado'
       });
@@ -40,9 +41,10 @@ router.post('/register', async (req, res) => {
 
     const senhaHash = await bcrypt.hash(senha, 10);
 
-    db.prepare(
-      'INSERT INTO usuarios (email, senha_hash) VALUES (?, ?)'
-    ).run(email, senhaHash);
+    await pool.query(
+      'INSERT INTO usuarios (email, senha_hash) VALUES ($1, $2)',
+      [email, senhaHash]
+    );
 
     return res.status(201).json({
       mensagem: 'Usuário criado com sucesso'
@@ -67,9 +69,11 @@ router.post('/login', async (req, res) => {
       });
     }
 
-    const usuario = db
-      .prepare('SELECT * FROM usuarios WHERE email = ?')
-      .get(email);
+    const resultado = await pool.query(
+      'SELECT * FROM usuarios WHERE email = $1',
+      [email]
+    );
+    const usuario = resultado.rows[0];
 
     if (!usuario) {
       return res.status(401).json({

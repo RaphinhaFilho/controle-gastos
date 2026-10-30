@@ -1,5 +1,5 @@
 const express = require('express');
-const db = require('../db');
+const pool = require('../db');
 const { autenticar } = require('../auth');
 
 const router = express.Router();
@@ -8,18 +8,20 @@ const router = express.Router();
 router.use(autenticar);
 
 // GET / (listar)
-router.get('/', (req, res) => {
-  const transacoes = db
-    .prepare(
-      'SELECT * FROM transacoes WHERE usuario_id = ? ORDER BY data DESC, id DESC'
-    )
-    .all(req.usuario.id);
-
-  return res.json(transacoes);
+router.get('/', async (req, res, next) => {
+  try {
+    const resultado = await pool.query(
+      'SELECT * FROM transacoes WHERE usuario_id = $1 ORDER BY data DESC, id DESC',
+      [req.usuario.id]
+    );
+    return res.json(resultado.rows);
+  } catch (err) {
+    return next(err);
+  }
 });
 
 // POST / (criar)
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const {
       descricao,
@@ -53,24 +55,21 @@ router.post('/', (req, res) => {
       });
     }
 
-    const resultado = db
-      .prepare(
-        `INSERT INTO transacoes
+    const resultado = await pool.query(
+      `INSERT INTO transacoes
         (usuario_id, descricao, valor, tipo, categoria, data)
-        VALUES (?, ?, ?, ?, ?, ?)`
-      )
-      .run(
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [
         req.usuario.id,
         descricao,
         valor,
         tipo,
         categoria,
         data
-      );
-
-    const nova = db
-      .prepare('SELECT * FROM transacoes WHERE id = ? AND usuario_id = ?')
-      .get(resultado.lastInsertRowid, req.usuario.id);
+      ]
+    );
+    const nova = resultado.rows[0];
 
     return res.status(201).json(nova);
   } catch (err) {
@@ -83,7 +82,7 @@ router.post('/', (req, res) => {
 });
 
 // DELETE /:id (deletar)
-router.delete('/:id', (req, res) => {
+router.delete('/:id', async (req, res) => {
   try {
     const id = Number(req.params.id);
 
@@ -94,11 +93,12 @@ router.delete('/:id', (req, res) => {
     }
 
     // A condição garante que só o proprietário possa excluir a transação.
-    const resultado = db
-      .prepare('DELETE FROM transacoes WHERE id = ? AND usuario_id = ?')
-      .run(id, req.usuario.id);
+    const resultado = await pool.query(
+      'DELETE FROM transacoes WHERE id = $1 AND usuario_id = $2',
+      [id, req.usuario.id]
+    );
 
-    if (resultado.changes === 0) {
+    if (resultado.rowCount === 0) {
       return res.status(404).json({
         erro: 'Transação não encontrada'
       });

@@ -12,5 +12,8 @@
     "@tailwindcss/vite": "^4.3.3",
     "tailwindcss": "^4.3.3",
     "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }

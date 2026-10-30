@@ -1,38 +1,40 @@
-@baseUrl = http://localhost:3000
-@email = teste@teste.com
-@senha = 1234
+### Informações sobre os testes no Render
+# No plano Free, o serviço pode dormir após 15 minutos de inatividade.
+# A primeira requisição após esse período pode demorar até 50 segundos.
+# O banco SQLite do Render Free é efêmero; após reinicializações do serviço,
+# talvez seja necessário cadastrar o usuário novamente.
+# Copie o token retornado pelo POST /api/login e cole no lugar de
+# <COLE_O_TOKEN_AQUI> nas requisições protegidas abaixo.
 
-### Teste 1: verificar a API
-GET {{baseUrl}}/
+### 1. Verificar se a API está respondendo
+GET https://controle-gastos-api-4yvq.onrender.com/
 
-### Teste 2: cadastrar usuário (400 Email já cadastrado é esperado se já existir)
-POST {{baseUrl}}/api/register
+### 2. Cadastrar o usuário de teste
+POST https://controle-gastos-api-4yvq.onrender.com/api/register
 Content-Type: application/json
 
 {
-  "email": "{{email}}",
-  "senha": "{{senha}}"
+  "email": "teste@teste.com",
+  "senha": "1234"
 }
 
-### Teste 3: fazer login e obter token
-# @name login
-POST {{baseUrl}}/api/login
+### 3. Fazer login e copiar o token retornado
+POST https://controle-gastos-api-4yvq.onrender.com/api/login
 Content-Type: application/json
 
 {
-  "email": "{{email}}",
-  "senha": "{{senha}}"
+  "email": "teste@teste.com",
+  "senha": "1234"
 }
 
-### Teste 4: listar transações do usuário autenticado
-@token = {{login.response.body.token}}
-GET {{baseUrl}}/api/transacoes
-Authorization: Bearer {{token}}
+### 4. Listar as transações do usuário autenticado
+GET https://controle-gastos-api-4yvq.onrender.com/api/transacoes
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0ZUB0ZXN0ZS5jb20iLCJpYXQiOjE3OTE0MjY1NzgsImV4cCI6MTc5MTUxMjk3OH0.LMszYDPNTno4SrNxf12LtbpFYFnJya9Fuy509PhAMAA
 
-### Teste 5: criar transação
-POST {{baseUrl}}/api/transacoes
-Authorization: Bearer {{token}}
+### 5. Criar uma transação para o usuário autenticado
+POST https://controle-gastos-api-4yvq.onrender.com/api/transacoes
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0ZUB0ZXN0ZS5jb20iLCJpYXQiOjE3OTE0MjY1NzgsImV4cCI6MTc5MTUxMjk3OH0.LMszYDPNTno4SrNxf12LtbpFYFnJya9Fuy509PhAMAA
 
 {
   "descricao": "Almoço",
@@ -42,6 +44,6 @@ Content-Type: application/json
   "data": "2026-10-07"
 }
 
-### Teste 6: confirmar a transação na listagem
-GET {{baseUrl}}/api/transacoes
-Authorization: Bearer {{token}}
+### 6. Excluir uma transação pelo ID (substitua 1 pelo ID criado)
+DELETE https://controle-gastos-api-4yvq.onrender.com/api/transacoes/1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiZW1haWwiOiJ0ZXN0ZUB0ZXN0ZS5jb20iLCJpYXQiOjE3OTE0MjY1NzgsImV4cCI6MTc5MTUxMjk3OH0.LMszYDPNTno4SrNxf12LtbpFYFnJya9Fuy509PhAMAA

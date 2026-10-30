@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+const pool = require('./db');
 
 // Importa as rotas
 const rotasUsuarios = require('./routes/usuarios');
@@ -41,6 +42,19 @@ app.use((err, req, res, next) => {
 
 // ============ SOBE O SERVIDOR ============
 
-app.listen(PORT, () => {
-  console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
-});
+const iniciarServidor = async () => {
+  try {
+    await pool.ready;
+    await pool.query('SELECT 1');
+
+    app.listen(PORT, () => {
+      console.log(`✅ Servidor rodando em http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error('❌ Erro ao inicializar o banco PostgreSQL:', err);
+    await pool.end();
+    process.exitCode = 1;
+  }
+};
+
+iniciarServidor();
