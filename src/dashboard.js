@@ -1,3 +1,4 @@
+import { Chart, DoughnutController, ArcElement, Tooltip, Legend } from 'chart.js';
 import {
   listarTransacoes,
   criarTransacao,
@@ -9,6 +10,7 @@ import {
 if (!estaLogado()) {
   window.location.href = 'login.html';
 } else {
+  Chart.register(DoughnutController, ArcElement, Tooltip, Legend);
   document.body.classList.remove('is-guarded');
 
   const userEmail = localStorage.getItem('email');
@@ -34,8 +36,12 @@ if (!estaLogado()) {
   const transactionForm = document.getElementById('transaction-form');
   const saveError = document.getElementById('save-error');
   const saveButton = transactionForm.querySelector('button[type="submit"]');
+  const expensesChartCanvas = document.getElementById('expenses-chart');
+  const chartLoading = document.getElementById('chart-loading');
+  const chartEmpty = document.getElementById('chart-empty');
 
   let transactions = [];
+  let chartInstance = null;
 
   function setSummaryLoading(isLoading) {
     summaryValues.forEach((value) => {
@@ -77,6 +83,68 @@ if (!estaLogado()) {
     transactionCount.textContent = `${transactions.length} ${transactions.length === 1 ? 'registro' : 'registros'}`;
   }
 
+  function updateExpensesChart() {
+    const expensesByCategory = transactions
+      .filter((transaction) => transaction.tipo === 'despesa')
+      .reduce((totals, transaction) => {
+        totals.set(transaction.categoria, (totals.get(transaction.categoria) || 0) + transaction.valor);
+        return totals;
+      }, new Map());
+    const categories = [...expensesByCategory.entries()]
+      .sort((first, second) => second[1] - first[1]);
+
+    if (chartInstance) {
+      chartInstance.destroy();
+      chartInstance = null;
+    }
+
+    chartLoading.hidden = true;
+    if (categories.length === 0) {
+      expensesChartCanvas.hidden = true;
+      chartEmpty.hidden = false;
+      return;
+    }
+
+    chartEmpty.hidden = true;
+    expensesChartCanvas.hidden = false;
+
+    const colors = ['#8b5cf6', '#a855f7', '#c4b5fd', '#7c3aed', '#6d28d9'];
+    chartInstance = new Chart(expensesChartCanvas, {
+      type: 'doughnut',
+      data: {
+        labels: categories.map(([category]) => category),
+        datasets: [{
+          data: categories.map(([, total]) => total),
+          backgroundColor: categories.map((_, index) => colors[index % colors.length]),
+          borderColor: 'rgba(30, 27, 75, 0.9)',
+          borderWidth: 3,
+          hoverOffset: 8,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '68%',
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              color: 'rgba(255, 255, 255, 0.78)',
+              padding: 18,
+              usePointStyle: true,
+              pointStyle: 'circle',
+            },
+          },
+          tooltip: {
+            callbacks: {
+              label: (context) => ` ${context.label}: ${currency.format(context.parsed)}`,
+            },
+          },
+        },
+      },
+    });
+  }
+
   function formatDate(date) {
     return dateFormatter.format(new Date(`${date}T12:00:00`));
   }
@@ -91,6 +159,7 @@ if (!estaLogado()) {
   function renderTransactions() {
     transactionsList.replaceChildren();
     updateSummary();
+    updateExpensesChart();
 
     const hasTransactions = transactions.length > 0;
     emptyState.hidden = hasTransactions;
@@ -159,6 +228,9 @@ if (!estaLogado()) {
     errorState.hidden = true;
     emptyState.hidden = true;
     tableWrap.hidden = true;
+    chartLoading.hidden = false;
+    chartEmpty.hidden = true;
+    expensesChartCanvas.hidden = true;
     setSummaryLoading(true);
 
     try {
@@ -177,6 +249,7 @@ if (!estaLogado()) {
     } catch (error) {
       transactions = [];
       updateSummary();
+      updateExpensesChart();
       setSummaryLoading(false);
       showLoadError(error.message || 'Não foi possível carregar as transações. Tente novamente.');
     }
