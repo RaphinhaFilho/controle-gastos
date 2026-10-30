@@ -37,8 +37,8 @@ if (!estaLogado()) {
   const saveError = document.getElementById('save-error');
   const saveButton = transactionForm.querySelector('button[type="submit"]');
   const expensesChartCanvas = document.getElementById('expenses-chart');
-  const chartLoading = document.getElementById('chart-loading');
-  const chartEmpty = document.getElementById('chart-empty');
+  const chartSection = document.getElementById('expense-chart-section');
+  const chartTitle = document.getElementById('expenses-chart-title');
   const monthFilter = document.getElementById('filter-month');
   const typeFilter = document.getElementById('filter-type');
 
@@ -128,28 +128,36 @@ if (!estaLogado()) {
   }
 
   function updateExpensesChart() {
-    const expensesByCategory = transactions
-      .filter((transaction) => transaction.tipo === 'despesa')
-      .reduce((totals, transaction) => {
-        totals.set(transaction.categoria, (totals.get(transaction.categoria) || 0) + transaction.valor);
-        return totals;
-      }, new Map());
-    const categories = [...expensesByCategory.entries()]
-      .sort((first, second) => second[1] - first[1]);
+    const activeType = typeFilter.value;
 
     if (chartInstance) {
       chartInstance.destroy();
       chartInstance = null;
     }
 
-    chartLoading.hidden = true;
-    if (categories.length === 0) {
+    if (activeType === 'all' || transactions.length === 0) {
+      chartSection.classList.add('hidden');
       expensesChartCanvas.hidden = true;
-      chartEmpty.hidden = false;
       return;
     }
 
-    chartEmpty.hidden = true;
+    const transactionsForChart = transactions.filter((transaction) => transaction.tipo === activeType);
+    const totalsByCategory = transactionsForChart
+      .reduce((totals, transaction) => {
+        totals.set(transaction.categoria, (totals.get(transaction.categoria) || 0) + transaction.valor);
+        return totals;
+      }, new Map());
+    const categories = [...totalsByCategory.entries()]
+      .sort((first, second) => second[1] - first[1]);
+
+    if (categories.length === 0) {
+      chartSection.classList.add('hidden');
+      expensesChartCanvas.hidden = true;
+      return;
+    }
+
+    chartTitle.textContent = `${activeType === 'receita' ? 'Receitas' : 'Despesas'} por categoria`;
+    chartSection.classList.remove('hidden');
     expensesChartCanvas.hidden = false;
 
     const colors = ['#8b5cf6', '#a855f7', '#c4b5fd', '#7c3aed', '#6d28d9'];
@@ -274,8 +282,7 @@ if (!estaLogado()) {
     errorState.hidden = true;
     emptyState.hidden = true;
     tableWrap.hidden = true;
-    chartLoading.hidden = false;
-    chartEmpty.hidden = true;
+    chartSection.classList.add('hidden');
     expensesChartCanvas.hidden = true;
     setSummaryLoading(true);
 
