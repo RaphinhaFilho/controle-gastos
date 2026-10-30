@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const pool = require('./db');
+const { pool, initDb } = require('./db');
 
 // Importa as rotas
 const rotasUsuarios = require('./routes/usuarios');
@@ -44,7 +44,7 @@ app.use((err, req, res, next) => {
 
 const iniciarServidor = async () => {
   try {
-    await pool.ready;
+    await initDb();
     await pool.query('SELECT 1');
 
     app.listen(PORT, () => {
