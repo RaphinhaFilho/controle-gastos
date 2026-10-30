@@ -39,7 +39,10 @@ if (!estaLogado()) {
   const expensesChartCanvas = document.getElementById('expenses-chart');
   const chartLoading = document.getElementById('chart-loading');
   const chartEmpty = document.getElementById('chart-empty');
+  const monthFilter = document.getElementById('filter-month');
+  const typeFilter = document.getElementById('filter-type');
 
+  let allTransactions = [];
   let transactions = [];
   let chartInstance = null;
 
@@ -68,6 +71,47 @@ if (!estaLogado()) {
   document.getElementById('close-dialog-button').addEventListener('click', () => transactionDialog.close());
   document.getElementById('cancel-dialog-button').addEventListener('click', () => transactionDialog.close());
   document.getElementById('retry-button').addEventListener('click', loadTransactions);
+
+  function updateMonthFilterOptions() {
+    const selectedMonth = monthFilter.value;
+    const monthKeys = [...new Set(allTransactions.map((transaction) => transaction.data.slice(0, 7)))]
+      .filter((monthKey) => /^\d{4}-(0[1-9]|1[0-2])$/.test(monthKey))
+      .sort((first, second) => second.localeCompare(first));
+    const monthFormatter = new Intl.DateTimeFormat('pt-BR', {
+      month: 'long',
+      timeZone: 'UTC',
+    });
+
+    monthFilter.replaceChildren(new Option('Todos os meses', ''));
+    monthKeys.forEach((monthKey) => {
+      const [year, month] = monthKey.split('-').map(Number);
+      const monthName = monthFormatter.format(new Date(Date.UTC(year, month - 1, 1)));
+      const label = `${monthName} ${year}`;
+      const monthOption = new Option(
+        `${label.charAt(0).toLocaleUpperCase('pt-BR')}${label.slice(1)}`,
+        monthKey
+      );
+      monthFilter.add(monthOption);
+    });
+
+    monthFilter.value = monthKeys.includes(selectedMonth) ? selectedMonth : '';
+  }
+
+  function applyTransactionFilters() {
+    const selectedMonth = monthFilter.value;
+    const selectedType = typeFilter.value;
+
+    transactions = allTransactions.filter((transaction) => {
+      const matchesMonth = !selectedMonth || transaction.data.slice(0, 7) === selectedMonth;
+      const matchesType = selectedType === 'all' || transaction.tipo === selectedType;
+      return matchesMonth && matchesType;
+    });
+
+    renderTransactions();
+  }
+
+  monthFilter.addEventListener('change', applyTransactionFilters);
+  typeFilter.addEventListener('change', applyTransactionFilters);
 
   function updateSummary() {
     const income = transactions
@@ -224,6 +268,8 @@ if (!estaLogado()) {
   }
 
   async function loadTransactions() {
+    monthFilter.disabled = true;
+    typeFilter.disabled = true;
     loadingState.hidden = false;
     errorState.hidden = true;
     emptyState.hidden = true;
@@ -242,12 +288,19 @@ if (!estaLogado()) {
         throw new Error('Não foi possível interpretar as transações recebidas.');
       }
 
-      transactions = normalizedTransactions;
+      allTransactions = normalizedTransactions;
+      updateMonthFilterOptions();
+      monthFilter.disabled = false;
+      typeFilter.disabled = false;
       loadingState.hidden = true;
-      renderTransactions();
+      applyTransactionFilters();
       setSummaryLoading(false);
     } catch (error) {
+      allTransactions = [];
       transactions = [];
+      updateMonthFilterOptions();
+      monthFilter.disabled = false;
+      typeFilter.disabled = false;
       updateSummary();
       updateExpensesChart();
       setSummaryLoading(false);
@@ -289,10 +342,11 @@ if (!estaLogado()) {
       const criada = normalizeTransaction(await criarTransacao(dados));
       if (!criada) throw new Error('A API não retornou a transação criada.');
 
-      transactions = [...transactions, criada];
+      allTransactions = [...allTransactions, criada];
+      updateMonthFilterOptions();
       transactionForm.reset();
       transactionDialog.close();
-      renderTransactions();
+      applyTransactionFilters();
     } catch (error) {
       saveError.textContent = error.message || 'Não foi possível salvar a transação. Tente novamente.';
       saveError.hidden = false;

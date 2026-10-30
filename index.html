@@ -106,6 +106,27 @@
           </div>
 
           <div class="transaction-panel glass-card glass-card-enter rounded-3xl border border-white/20 bg-white/10 shadow-login-glow backdrop-blur-xl">
+            <div class="filter-bar grid grid-cols-1 gap-3 border-b border-white/10 p-4 sm:grid-cols-2 sm:p-5" aria-label="Filtros de transações">
+              <label class="grid gap-2 text-xs font-medium uppercase tracking-wider text-white/65" for="filter-month">
+                Mês
+                <span class="form-input-wrap relative">
+                  <select class="form-control h-11 w-full rounded-xl border border-white/20 bg-white/10 px-4 pr-10 text-sm font-normal normal-case tracking-normal text-white outline-none transition hover:bg-white/15 focus:border-brand-lilac" id="filter-month">
+                    <option value="">Todos os meses</option>
+                  </select>
+                </span>
+              </label>
+              <label class="grid gap-2 text-xs font-medium uppercase tracking-wider text-white/65" for="filter-type">
+                Tipo
+                <span class="form-input-wrap relative">
+                  <select class="form-control h-11 w-full rounded-xl border border-white/20 bg-white/10 px-4 pr-10 text-sm font-normal normal-case tracking-normal text-white outline-none transition hover:bg-white/15 focus:border-brand-lilac" id="filter-type">
+                    <option value="all">Todos</option>
+                    <option value="receita">Apenas Receitas</option>
+                    <option value="despesa">Apenas Despesas</option>
+                  </select>
+                </span>
+              </label>
+            </div>
+
             <div class="loading-state flex min-h-64 flex-col items-center justify-center gap-4 p-6 text-center text-sm text-white/70" id="loading-state" aria-live="polite">
               <span class="loading-spinner" aria-hidden="true"></span>
               <span>Carregando suas transações...</span>
