@@ -79,18 +79,6 @@
           </article>
         </section>
 
-        <section class="expense-chart-section mb-10 hidden" id="expense-chart-section" aria-labelledby="expenses-chart-title">
-          <div class="glass-card rounded-3xl border border-white/20 bg-white/10 p-5 shadow-login-glow backdrop-blur-xl sm:p-6">
-            <div class="mb-5">
-              <p class="eyebrow mb-2 text-xs uppercase tracking-wider text-white/55">Relatório</p>
-              <h2 class="text-xl font-semibold tracking-tight text-white" id="expenses-chart-title">Despesas por categoria</h2>
-            </div>
-            <div class="relative mx-auto h-64 w-full max-w-lg sm:h-72">
-              <canvas class="h-full w-full" id="expenses-chart" aria-label="Gráfico de rosca de despesas por categoria" role="img" hidden></canvas>
-            </div>
-          </div>
-        </section>
-
         <section class="transactions-section" aria-labelledby="transactions-title">
           <div class="section-heading mb-4 flex items-end justify-between gap-4 sm:mb-5">
             <div>
@@ -169,6 +157,18 @@
                 </thead>
                 <tbody class="divide-y divide-white/10 text-sm text-white/85" id="transactions-list"></tbody>
               </table>
+            </div>
+          </div>
+        </section>
+
+        <section class="expense-chart-section mb-10 hidden" id="expense-chart-section" aria-labelledby="expenses-chart-title">
+          <div class="glass-card rounded-3xl border border-white/20 bg-white/10 p-5 shadow-login-glow backdrop-blur-xl sm:p-6">
+            <div class="mb-5">
+              <p class="eyebrow mb-2 text-xs uppercase tracking-wider text-white/55">Relatório</p>
+              <h2 class="text-xl font-semibold tracking-tight text-white" id="expenses-chart-title">Despesas por categoria</h2>
+            </div>
+            <div class="relative mx-auto h-64 w-full max-w-lg sm:h-72">
+              <canvas class="h-full w-full" id="expenses-chart" aria-label="Gráfico de rosca de despesas por categoria" role="img" hidden></canvas>
             </div>
           </div>
         </section>
