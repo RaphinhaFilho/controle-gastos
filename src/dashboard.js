@@ -11,6 +11,9 @@ if (!estaLogado()) {
 } else {
   document.body.classList.remove('is-guarded');
 
+  const userEmail = localStorage.getItem('email');
+  document.getElementById('user-email').textContent = userEmail || 'Usuário';
+
   const currency = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
   const dateFormatter = new Intl.DateTimeFormat('pt-BR');
 
