@@ -135,39 +135,75 @@ if (!estaLogado()) {
       chartInstance = null;
     }
 
-    if (activeType === 'all' || transactions.length === 0) {
+    const chartTransactions = transactions.filter((transaction) => (
+      activeType === 'all' || transaction.tipo === activeType
+    ));
+
+    if (chartTransactions.length === 0) {
       chartSection.classList.add('hidden');
       expensesChartCanvas.hidden = true;
       return;
     }
 
-    const transactionsForChart = transactions.filter((transaction) => transaction.tipo === activeType);
-    const totalsByCategory = transactionsForChart
+    const totalsByTypeAndCategory = chartTransactions
       .reduce((totals, transaction) => {
-        totals.set(transaction.categoria, (totals.get(transaction.categoria) || 0) + transaction.valor);
+        if (!totals.has(transaction.tipo)) totals.set(transaction.tipo, new Map());
+        const categoryTotals = totals.get(transaction.tipo);
+        categoryTotals.set(
+          transaction.categoria,
+          (categoryTotals.get(transaction.categoria) || 0) + transaction.valor
+        );
         return totals;
       }, new Map());
-    const categories = [...totalsByCategory.entries()]
-      .sort((first, second) => second[1] - first[1]);
+    const typesPresent = [...totalsByTypeAndCategory.keys()];
+    const hasIncome = typesPresent.includes('receita');
+    const hasExpenses = typesPresent.includes('despesa');
+    const hasBothTypes = hasIncome && hasExpenses;
+    const segments = [...totalsByTypeAndCategory.entries()]
+      .flatMap(([type, categories]) => [...categories.entries()].map(([category, total]) => ({
+        type,
+        category,
+        total,
+      })))
+      .sort((first, second) => second.total - first.total);
 
-    if (categories.length === 0) {
+    if (segments.length === 0) {
       chartSection.classList.add('hidden');
       expensesChartCanvas.hidden = true;
       return;
     }
 
-    chartTitle.textContent = `${activeType === 'receita' ? 'Receitas' : 'Despesas'} por categoria`;
+    const title = hasBothTypes
+      ? 'Receitas e despesas por categoria'
+      : hasIncome
+        ? 'Receitas por categoria'
+        : 'Despesas por categoria';
+    chartTitle.textContent = title;
+    expensesChartCanvas.setAttribute('aria-label', `Gráfico de rosca: ${title.toLocaleLowerCase('pt-BR')}`);
     chartSection.classList.remove('hidden');
     expensesChartCanvas.hidden = false;
 
-    const colors = ['#8b5cf6', '#a855f7', '#c4b5fd', '#7c3aed', '#6d28d9'];
+    const colorsByType = {
+      receita: ['#8b5cf6', '#a855f7', '#c4b5fd', '#7c3aed', '#6d28d9'],
+      despesa: ['#f8fafc', '#e2e8f0', '#cbd5e1', '#94a3b8', '#64748b'],
+    };
+    const colorIndexes = { receita: 0, despesa: 0 };
+    const segmentColors = segments.map(({ type }) => {
+      const palette = colorsByType[type];
+      const color = palette[colorIndexes[type] % palette.length];
+      colorIndexes[type] += 1;
+      return color;
+    });
+
     chartInstance = new Chart(expensesChartCanvas, {
       type: 'doughnut',
       data: {
-        labels: categories.map(([category]) => category),
+        labels: segments.map(({ type, category }) => (
+          hasBothTypes ? `${type === 'receita' ? 'Receitas' : 'Despesas'} · ${category}` : category
+        )),
         datasets: [{
-          data: categories.map(([, total]) => total),
-          backgroundColor: categories.map((_, index) => colors[index % colors.length]),
+          data: segments.map(({ total }) => total),
+          backgroundColor: segmentColors,
           borderColor: 'rgba(30, 27, 75, 0.9)',
           borderWidth: 3,
           hoverOffset: 8,
